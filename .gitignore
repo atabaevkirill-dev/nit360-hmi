@@ -1,0 +1,11 @@
+node_modules/
+.venv/
+.venv-build/
+__pycache__/
+build/
+dist/
+pyside/packaging/tools/
+.DS_Store
+
+# сломанный экспорт Next.js от прежней версии интерфейса
+out/

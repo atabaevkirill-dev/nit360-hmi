@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NIT-360 HMI | Тепловизор</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">NIT<span>360</span></div>
+      <div class="brand-sub">ТЕПЛОВИЗОР · RS-422 · 640×512 · 3.7–4.8 мкм</div>
+    </div>
+    <div class="topbar-status">
+      <div class="led-group">
+        <span class="led" id="led-service" data-state="off"></span>
+        <span class="led-label">СЕРВИС</span>
+      </div>
+      <div class="led-group">
+        <span class="led" id="led-link" data-state="off"></span>
+        <span class="led-label">RS-422</span>
+      </div>
+      <div class="led-group">
+        <span class="led" id="led-traffic" data-state="off"></span>
+        <span class="led-label">ОБМЕН</span>
+      </div>
+      <div class="topbar-readout">
+        <span class="readout-key">НАРАБОТКА</span>
+        <span class="readout-value" id="rd-runtime">—</span>
+      </div>
+      <div class="topbar-readout">
+        <span class="readout-key">ДАТА И ВРЕМЯ</span>
+        <span class="readout-value" id="rd-clock"><span class="clock-date">--.--.----</span> --:--:--</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="grid">
+
+    <!-- ── Левая колонка ───────────────────────────────── -->
+    <section class="col col-left">
+      <div class="panel">
+        <div class="panel-head"><h2>ПОДКЛЮЧЕНИЕ</h2><span class="chip" id="conn-chip">НЕТ СВЯЗИ</span></div>
+        <div class="panel-body">
+          <label class="field">
+            <span class="field-label">Порт</span>
+            <div class="field-row">
+              <select id="sel-port"></select>
+              <button class="btn btn-ghost btn-icon" id="btn-refresh" title="Обновить список портов">⟳</button>
+            </div>
+          </label>
+          <label class="field">
+            <span class="field-label">Скорость, бод</span>
+            <select id="sel-baud">
+              <option value="2400">2400</option>
+              <option value="9600" selected>9600</option>
+              <option value="19200">19200</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">ID устройства</span>
+            <input type="number" id="inp-id" min="0" max="255" value="9" />
+          </label>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="btn-connect">ПОДКЛЮЧИТЬ</button>
+            <button class="btn btn-danger" id="btn-disconnect" disabled>ОТКЛЮЧИТЬ</button>
+          </div>
+          <p class="hint" id="conn-hint">Формат кадра 8N1, 7 байт, XOR-контроль.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>СОСТОЯНИЕ</h2></div>
+        <div class="panel-body state-grid">
+          <div class="state-item"><span>Полярность</span><b id="st-polarity">—</b></div>
+          <div class="state-item"><span>Цифр. зум</span><b id="st-dzoom">—</b></div>
+          <div class="state-item"><span>DDE</span><b id="st-dde">—</b></div>
+          <div class="state-item"><span>Перекрестие</span><b id="st-crosshair">—</b></div>
+          <div class="state-item"><span>Фильтр</span><b id="st-filter">—</b></div>
+          <div class="state-item"><span>Поле зрения</span><b id="st-fov">—</b></div>
+          <div class="state-item"><span>Режим ИК</span><b id="st-ir">—</b></div>
+          <div class="state-item"><span>Язык OSD</span><b id="st-lang">—</b></div>
+          <div class="state-item state-wide"><span>Наработка</span><b id="st-runtime">—</b></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>СЕРВИС</h2></div>
+        <div class="panel-body">
+          <div class="btn-row">
+            <button class="btn" data-cmd="check_comm">ПРОВЕРКА СВЯЗИ</button>
+            <button class="btn" id="btn-runtime">НАРАБОТКА</button>
+          </div>
+          <label class="field">
+            <span class="field-label">Язык меню прибора</span>
+            <div class="seg" id="seg-lang">
+              <button class="seg-btn" data-lang="RU">РУС</button>
+              <button class="seg-btn" data-lang="EN">ENG</button>
+            </div>
+          </label>
+          <label class="field">
+            <span class="field-label">Записать новый ID</span>
+            <div class="field-row">
+              <input type="number" id="inp-newid" min="0" max="255" value="9" />
+              <button class="btn btn-ghost" id="btn-setid">ЗАПИСАТЬ</button>
+            </div>
+          </label>
+          <label class="field">
+            <span class="field-label">Скорость обмена прибора</span>
+            <div class="field-row">
+              <select id="sel-newbaud">
+                <option value="2400">2400</option>
+                <option value="9600" selected>9600</option>
+                <option value="19200">19200</option>
+              </select>
+              <button class="btn btn-ghost" id="btn-setbaud">ЗАПИСАТЬ</button>
+            </div>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Центральная колонка ─────────────────────────── -->
+    <section class="col col-mid">
+      <div class="panel">
+        <div class="panel-head"><h2>ФОКУС И ЗУМ</h2></div>
+        <div class="panel-body">
+          <div class="control-block">
+            <span class="control-label">Фокусировка</span>
+            <div class="btn-row">
+              <button class="btn btn-hold" data-cmd="focus_far">◄ ДАЛЕКО</button>
+              <button class="btn btn-accent" data-cmd="focus_auto">АВТО</button>
+              <button class="btn btn-hold" data-cmd="focus_near">БЛИЗКО ►</button>
+            </div>
+          </div>
+          <div class="control-block">
+            <span class="control-label">Оптический зум · 18–360 мм</span>
+            <div class="btn-row">
+              <button class="btn btn-hold" data-cmd="zoom_wide">− ШИРОКО</button>
+              <button class="btn btn-hold" data-cmd="zoom_tele">+ ТЕЛЕ</button>
+            </div>
+          </div>
+          <div class="control-block">
+            <span class="control-label">Цифровой зум</span>
+            <div class="seg" id="seg-dzoom">
+              <button class="seg-btn" data-cmd="dzoom_x1" data-val="x1">×1</button>
+              <button class="seg-btn" data-cmd="dzoom_x2" data-val="x2">×2</button>
+              <button class="seg-btn" data-cmd="dzoom_x4" data-val="x4">×4</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>ИЗОБРАЖЕНИЕ</h2></div>
+        <div class="panel-body">
+          <div class="control-block">
+            <span class="control-label">Полярность</span>
+            <div class="seg" id="seg-polarity">
+              <button class="seg-btn" data-cmd="polarity_pos" data-val="positive">БЕЛОЕ-ГОРЯЧЕЕ</button>
+              <button class="seg-btn" data-cmd="polarity_neg" data-val="negative">ЧЁРНОЕ-ГОРЯЧЕЕ</button>
+            </div>
+          </div>
+          <div class="control-block">
+            <span class="control-label">Режим яркости и контраста</span>
+            <div class="seg" id="seg-ir">
+              <button class="seg-btn" data-cmd="ir_auto" data-val="auto">АВТО</button>
+              <button class="seg-btn" data-cmd="ir_manual" data-val="manual">РУЧНОЙ</button>
+            </div>
+          </div>
+          <div class="dual-row">
+            <div class="control-block">
+              <span class="control-label">Яркость</span>
+              <div class="btn-row">
+                <button class="btn btn-hold" data-cmd="brightness_minus">−</button>
+                <button class="btn btn-hold" data-cmd="brightness_plus">+</button>
+              </div>
+            </div>
+            <div class="control-block">
+              <span class="control-label">Контраст</span>
+              <div class="btn-row">
+                <button class="btn btn-hold" data-cmd="contrast_minus">−</button>
+                <button class="btn btn-hold" data-cmd="contrast_plus">+</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-block">
+            <span class="control-label">Время интеграции</span>
+            <div class="btn-row">
+              <button class="btn btn-hold" data-cmd="int_time_minus">− УМЕНЬШИТЬ</button>
+              <button class="btn btn-hold" data-cmd="int_time_plus">+ УВЕЛИЧИТЬ</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>ФУНКЦИИ</h2></div>
+        <div class="panel-body">
+          <div class="toggle-grid">
+            <div class="control-block">
+              <span class="control-label">DDE</span>
+              <div class="seg" id="seg-dde">
+                <button class="seg-btn" data-cmd="dde_on" data-val="true">ВКЛ</button>
+                <button class="seg-btn" data-cmd="dde_off" data-val="false">ВЫКЛ</button>
+              </div>
+            </div>
+            <div class="control-block">
+              <span class="control-label">Перекрестие</span>
+              <div class="seg" id="seg-crosshair">
+                <button class="seg-btn" data-cmd="crosshair_on" data-val="true">ВКЛ</button>
+                <button class="seg-btn" data-cmd="crosshair_off" data-val="false">ВЫКЛ</button>
+              </div>
+            </div>
+            <div class="control-block">
+              <span class="control-label">Фильтр</span>
+              <div class="seg" id="seg-filter">
+                <button class="seg-btn" data-cmd="filter_on" data-val="true">ВКЛ</button>
+                <button class="seg-btn" data-cmd="filter_off" data-val="false">ВЫКЛ</button>
+              </div>
+            </div>
+            <div class="control-block">
+              <span class="control-label">Поле зрения</span>
+              <div class="seg" id="seg-fov">
+                <button class="seg-btn" data-cmd="fov_large" data-val="large">БОЛЬШОЕ</button>
+                <button class="seg-btn" data-cmd="fov_small" data-val="small">МАЛОЕ</button>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-warn btn-wide" data-cmd="nuc">НУК · КОРРЕКЦИЯ НЕОДНОРОДНОСТИ</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Правая колонка ──────────────────────────────── -->
+    <section class="col col-right">
+      <div class="panel panel-log">
+        <div class="panel-head">
+          <h2>ЖУРНАЛ ОБМЕНА</h2>
+          <div class="head-actions">
+            <button class="btn btn-ghost btn-sm" id="btn-pause">ПАУЗА</button>
+            <button class="btn btn-ghost btn-sm" id="btn-clear">ОЧИСТИТЬ</button>
+          </div>
+        </div>
+        <div class="log" id="log"></div>
+        <div class="log-foot">
+          <span>TX <b id="cnt-tx">0</b></span>
+          <span>RX <b id="cnt-rx">0</b></span>
+          <span>ОШИБОК <b id="cnt-err">0</b></span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="statusbar">
+    <span id="sb-msg">Готово</span>
+    <span class="statusbar-right">
+      NIT-360 HMI Control Panel <b id="sb-version">v1.0.0</b> · протокол 7 байт · RS-422 Full Duplex
+    </span>
+  </footer>
+
+</div>
+<script src="vendor/socket.io.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

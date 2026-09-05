@@ -1,0 +1,2 @@
+# Зависимости сборки (в дополнение к pyside/requirements.txt)
+pyinstaller>=6.16

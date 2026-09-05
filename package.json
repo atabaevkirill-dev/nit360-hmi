@@ -1,0 +1,53 @@
+{
+  "name": "nit360-hmi",
+  "version": "1.0.0",
+  "description": "NIT-360 Thermal Imager HMI Control Panel — Desktop Application",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "node scripts/dev-server.js",
+    "start": "electron .",
+    "test": "node scripts/test-protocol.js",
+    "sync:client": "node scripts/sync-client.js",
+    "build:exe": "electron-builder --win",
+    "build:appimage": "electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.nit360.hmi",
+    "productName": "NIT-360 HMI",
+    "files": [
+      "electron/**",
+      "renderer/**",
+      "public/**",
+      "scripts/**"
+    ],
+    "extraResources": [],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "serialport": "^13.0.0",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.0"
+  }
+}
